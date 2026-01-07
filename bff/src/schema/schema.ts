@@ -22,7 +22,7 @@ export const typeDefs = gql`
   }
 
   type Query {
-    productListing: ProductListing!
+    productListing(page: Int!, pageSize: Int!): ProductListing!
   }
 
   type Subscription {

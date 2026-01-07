@@ -5,6 +5,7 @@ export const UPDATE_PRODUCT_PRICE = gql`
     updateProductPrice(productId: $productId, newPrice: $newPrice) {
       id
       price
+      __typename
     }
   }
 `;

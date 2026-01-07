@@ -9,8 +9,7 @@ export const PRODUCT_LISTING = gql`
       }
       ads {
         id
-        position
-        creativeUrl
+        title
       }
     }
   }
