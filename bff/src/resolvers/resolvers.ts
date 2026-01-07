@@ -1,6 +1,13 @@
 import { PubSub } from "graphql-subscriptions";
 import fetch from "node-fetch";
 
+type Ad = {
+  id: string;
+  title: string;
+  imageUrl: string;
+  targetUrl: string;
+};
+
 const pubsub = new PubSub();
 const PRODUCTS_SERVICE_URL = "http://localhost:5001/products";
 const ADS_SERVICE_URL = "http://localhost:5002/ads";
@@ -14,14 +21,24 @@ export const resolvers = {
       const products = await productsRes.json();
 
       // Fetch ads list with partial failure handling
-      let ads = [];
+      let ads: Ad[] = [];
       try {
         const adsRes = await fetch(`${ADS_SERVICE_URL}`);
         if (!adsRes.ok) throw new Error("Ads fetch failed");
-        ads = await adsRes.json();
+
+        const adsJson: unknown = await adsRes.json();
+
+        if (Array.isArray(adsJson)) {
+          ads = adsJson as Ad[];
+        } else {
+          ads = [];
+        }
       } catch (e) {
-        console.error("Ads service failed:", e.message);
-        // Partial failure: Return empty ads but still show products
+        if (e instanceof Error) {
+          console.error("Ads service failed:", e.message);
+        } else {
+          console.error("Ads service failed:", e);
+        }
       }
 
       return { products, ads };
