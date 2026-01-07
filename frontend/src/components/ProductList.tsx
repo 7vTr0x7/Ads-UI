@@ -1,12 +1,11 @@
+import { useQuery, useSubscription } from "@apollo/client/react";
 import { useState } from "react";
-import { useQuery, useSubscription, useMutation } from "@apollo/client/react";
 
 import { PRODUCT_LISTING } from "@/graphql/products.queries";
-import { UPDATE_PRODUCT_PRICE } from "@/graphql/products.mutation";
 import { PRODUCT_UPDATED } from "@/graphql/products.subscriptions";
 
 import AdSlot from "./AdSlot";
-import ProductCard from "./ProductCard";
+import Products from "./Products";
 import Skeleton from "./Skeleton";
 
 /* =======================
@@ -41,19 +40,6 @@ interface ProductUpdatedData {
     id: string;
     price: number;
   };
-}
-
-interface UpdateProductPriceData {
-  updateProductPrice: {
-    id: string;
-    price: number;
-    __typename: "Product";
-  };
-}
-
-interface UpdateProductPriceVars {
-  id: string;
-  price: number;
 }
 
 /* =======================
@@ -98,14 +84,6 @@ export default function ProductList() {
   });
 
   /* -----------------------
-     Mutation: Update Price
-  ----------------------- */
-  const [updatePrice] = useMutation<
-    UpdateProductPriceData,
-    UpdateProductPriceVars
-  >(UPDATE_PRODUCT_PRICE);
-
-  /* -----------------------
      Loading/Error
   ----------------------- */
   if (loading && !data) return <Skeleton className="h-96" />;
@@ -135,37 +113,6 @@ export default function ProductList() {
   };
 
   /* -----------------------
-     Handler: Increase Price by 10
-  ----------------------- */
-  const handleIncreasePrice = (product: Product) => {
-    updatePrice({
-      variables: {
-        id: product.id,
-        price: product.price + 10,
-      },
-      optimisticResponse: {
-        updateProductPrice: {
-          __typename: "Product",
-          id: product.id,
-          price: product.price + 10,
-        },
-      },
-      update: (cache, { data }) => {
-        if (!data?.updateProductPrice) return;
-
-        cache.modify({
-          id: cache.identify({ __typename: "Product", id: product.id }),
-          fields: {
-            price() {
-              return data.updateProductPrice.price;
-            },
-          },
-        });
-      },
-    });
-  };
-
-  /* -----------------------
      Render
   ----------------------- */
   return (
@@ -178,21 +125,7 @@ export default function ProductList() {
       )}
 
       {/* Products Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {data?.productListing.products.map((product) => (
-          <div key={product.id} className="relative">
-            <ProductCard product={product} />
-            {/* Button to increase price */}
-            <button
-              className="absolute top-2 right-2 bg-green-600 text-white px-2 py-1 text-xs rounded"
-              onClick={() => handleIncreasePrice(product)}
-            >
-              +₹10
-            </button>
-          </div>
-        ))}
-      </div>
-
+      <Products data={data} />
       {/* Load More */}
       <button
         onClick={loadMore}
