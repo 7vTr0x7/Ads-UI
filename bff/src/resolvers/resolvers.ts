@@ -1,5 +1,11 @@
 import { PubSub } from "graphql-subscriptions";
-import fetch from "node-fetch";
+
+type Product = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+};
 
 type Ad = {
   id: string;
@@ -9,68 +15,65 @@ type Ad = {
 };
 
 const pubsub = new PubSub();
-const PRODUCTS_SERVICE_URL = "http://localhost:5001/products";
-const ADS_SERVICE_URL = "http://localhost:5002/ads";
+
+// Dummy products and ads
+const DUMMY_PRODUCTS: Product[] = Array.from({ length: 25 }, (_, i) => ({
+  id: `p${i + 1}`,
+  name: `Product ${i + 1}`,
+  description: `Description for Product ${i + 1}`,
+  price: 100 + i * 5,
+}));
+
+const DUMMY_ADS: Ad[] = [
+  { id: "a1", title: "Ad 1", imageUrl: "/ad1.png", targetUrl: "#" },
+  { id: "a2", title: "Ad 2", imageUrl: "/ad2.png", targetUrl: "#" },
+  { id: "a3", title: "Ad 3", imageUrl: "/ad3.png", targetUrl: "#" },
+];
 
 export const resolvers = {
   Query: {
-    productListing: async () => {
-      // Fetch products list
-      const productsRes = await fetch(`${PRODUCTS_SERVICE_URL}`);
-      if (!productsRes.ok) throw new Error("Failed to fetch products");
-      const products = await productsRes.json();
+    productListing: async (
+      _parent: any,
+      args: { page: number; pageSize: number }
+    ) => {
+      const { page, pageSize } = args;
 
-      // Fetch ads list with partial failure handling
-      let ads: Ad[] = [];
-      try {
-        const adsRes = await fetch(`${ADS_SERVICE_URL}`);
-        if (!adsRes.ok) throw new Error("Ads fetch failed");
+      // Paginate products
+      const start = (page - 1) * pageSize;
+      const paginatedProducts = DUMMY_PRODUCTS.slice(start, start + pageSize);
 
-        const adsJson: unknown = await adsRes.json();
-
-        if (Array.isArray(adsJson)) {
-          ads = adsJson as Ad[];
-        } else {
-          ads = [];
-        }
-      } catch (e) {
-        if (e instanceof Error) {
-          console.error("Ads service failed:", e.message);
-        } else {
-          console.error("Ads service failed:", e);
-        }
-      }
-
-      return { products, ads };
+      return {
+        products: paginatedProducts,
+        ads: DUMMY_ADS,
+      };
     },
   },
 
   Subscription: {
     productPriceUpdated: {
       subscribe: (_parent: any, args: { productId: string }) => {
-        // In real app, you'd filter by productId and use real pubsub backend
         return pubsub.asyncIterator(`PRODUCT_PRICE_UPDATED_${args.productId}`);
       },
     },
   },
 
   Product: {
-    id: (parent: any) => parent._id || parent.id,
+    id: (parent: any) => parent.id,
   },
 };
 
-// Simulate product price update every 30s
-setInterval(async () => {
-  // Random product id for demo
-  const randomProductId = "someProductId";
+// Simulate random price updates every 30 seconds
+setInterval(() => {
+  const randomIndex = Math.floor(Math.random() * DUMMY_PRODUCTS.length);
+  const product = DUMMY_PRODUCTS[randomIndex];
 
-  // Fetch product from products-service
-  const res = await fetch(`${PRODUCTS_SERVICE_URL}/${randomProductId}`);
-  if (!res.ok) return;
-  const updatedProduct = await res.json();
+  // Update price randomly
+  const newPrice = product.price + Math.floor(Math.random() * 20 - 10);
+  product.price = Math.max(newPrice, 0); // Ensure price is not negative
 
-  // Publish update
-  pubsub.publish(`PRODUCT_PRICE_UPDATED_${randomProductId}`, {
-    productPriceUpdated: updatedProduct,
+  pubsub.publish(`PRODUCT_PRICE_UPDATED_${product.id}`, {
+    productPriceUpdated: product,
   });
+
+  console.log(`Published price update for ${product.id}: ₹${product.price}`);
 }, 30000);
