@@ -18,6 +18,7 @@ export default defineConfig({
     federation({
       remotes: {
         ads: "http://localhost:6001/assets/remoteEntry.js",
+        products: "http://localhost:6002/assets/remoteEntry.js",
       },
 
       shared: ["react", "react-dom", "@apollo/client"],
