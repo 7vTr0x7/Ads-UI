@@ -1,3 +1,5 @@
+import "../index.css";
+
 export default function AdSlot() {
   // Placeholder for ad creative - real ad SDK could load here asynchronously
   return (

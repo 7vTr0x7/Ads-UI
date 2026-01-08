@@ -1,10 +1,11 @@
 import { useQuery, useSubscription } from "@apollo/client/react";
-import { useState } from "react";
+import { lazy, useState } from "react";
 
 import { PRODUCT_LISTING } from "@/graphql/products.queries";
 import { PRODUCT_UPDATED } from "@/graphql/products.subscriptions";
 
-import AdSlot from "./AdSlot";
+const AdSlot = lazy(() => import("ads/AdSlot"));
+
 import Products from "./Products";
 import Skeleton from "./Skeleton";
 

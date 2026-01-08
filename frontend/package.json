@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@apollo/client": "^4.0.11",
+    "@originjs/vite-plugin-federation": "^1.4.1",
     "@radix-ui/react-slot": "^1.2.4",
     "@tailwindcss/vite": "^4.1.18",
     "class-variance-authority": "^0.7.1",
