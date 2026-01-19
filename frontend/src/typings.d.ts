@@ -3,3 +3,8 @@ declare module "ads/AdSlot" {
   const AdSlot: FC;
   export default AdSlot;
 }
+declare module "products/Products" {
+  import { FC } from "react";
+  const Products: FC;
+  export default Products;
+}

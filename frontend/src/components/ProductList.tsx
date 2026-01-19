@@ -5,9 +5,10 @@ import { PRODUCT_LISTING } from "@/graphql/products.queries";
 import { PRODUCT_UPDATED } from "@/graphql/products.subscriptions";
 
 const AdSlot = lazy(() => import("ads/AdSlot"));
+const Products = lazy(() => import("products/Products"));
 
-import Products from "./Products";
 import Skeleton from "./Skeleton";
+import { UPDATE_PRODUCT_PRICE } from "@/graphql/products.mutation";
 
 /* =======================
    Types
@@ -118,15 +119,13 @@ export default function ProductList() {
   ----------------------- */
   return (
     <div className="space-y-6">
-      {/* Ads */}
       {data?.productListing.ads.length ? (
         data.productListing.ads.map((ad) => <AdSlot key={ad.id} />)
       ) : (
         <AdSlot />
       )}
-
       {/* Products Grid */}
-      <Products data={data} />
+      <Products data={data} mutation={UPDATE_PRODUCT_PRICE} />
       {/* Load More */}
       <button
         onClick={loadMore}

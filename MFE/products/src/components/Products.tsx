@@ -38,15 +38,15 @@ interface UpdateProductPriceVars {
 
 const Products: React.FC<{
   data: ProductListingData | undefined;
-  UPDATE_PRODUCT_PRICE: DocumentNode;
-}> = ({ data, UPDATE_PRODUCT_PRICE }) => {
+  mutation: DocumentNode;
+}> = ({ data, mutation }) => {
   /* -----------------------
          Mutation: Update Price
       ----------------------- */
   const [updatePrice] = useMutation<
     UpdateProductPriceData,
     UpdateProductPriceVars
-  >(UPDATE_PRODUCT_PRICE);
+  >(mutation);
 
   /* -----------------------
          Handler: Increase Price by 10

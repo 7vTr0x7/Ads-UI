@@ -1,33 +1,32 @@
 import path from "path";
-import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-import federation from "@originjs/vite-plugin-federation";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import { federation } from "@module-federation/vite";
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    react({
-      babel: {
-        plugins: [],
-      },
-    }),
+    react(),
     tailwindcss(),
     federation({
       name: "products",
       filename: "remoteEntry.js",
       exposes: {
-        "./Products": "./src/components/Products.tsx", // Expose component
+        "./Products": "./src/components/Products.tsx",
       },
-      shared: ["react", "react-dom", "@apollo/client"],
+      shared: {
+        react: { singleton: true },
+        "react-dom": { singleton: true },
+        "@apollo/client": { singleton: true },
+      },
     }),
   ],
+  server: {
+    port: 6002,
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-  },
-  server: {
-    port: 6002,
   },
 });
